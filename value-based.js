@@ -1,17 +1,19 @@
-
 // 
 // HTML5 Placeholder Polyfill
 // 
-// Works in IE7+ (Yeah, I intentionally left out IE6 support)
+// Works in IE7+
 // 
 
 (function(window, document) {
 
+	// Define the namespace for the polyfill
+	var ns = window.placeholderPolyfill = { };
+
 	// Check if we need to polyfill placeholders
-	var support = ('placeholder' in document.createElement('input'));
+	ns.nativeSupport = ('placeholder' in document.createElement('input'));
 
 	// If placeholders are natively supported, we're all done here
-	if (support) {return;}
+	if (ns.nativeSupport) {return;}
 
 	// Reused strings
 	var polyfilledAttr = 'data-placeholder-polyfilled';
@@ -21,9 +23,6 @@
 	// These should stay dynamically up-to-date throughout the lifespan of the app
 	var inputs = document.getElementsByTagName('input');
 	var textareas = document.getElementsByTagName('textarea');
-
-	// Define the namespace for the polyfill
-	var ns = window.placeholderPolyfill = { };
 
 	// Define the main polyfill method
 	ns.run = function(elems) {
@@ -54,6 +53,15 @@
 	// support placeholder
 	ns.getAllInputs = function(elems) {
 		var result = [ ];
+
+		if (elems.nodeType === 1) {
+			if (ns.isSupportedInput(elems)) {
+				return [elems];
+			}
+			elems = ns.getAllInputs(elems.getElementsByTagName('input')).concat(
+				ns.getAllInputs(elems.getElementsByTagName('textarea'))
+			);
+		}
 
 		for (var i = 0, c = elems.length; i < c; i++) {
 			if (ns.isSupportedInput(elems[i])) {
